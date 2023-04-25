@@ -89,22 +89,26 @@ class ViewController: UIViewController, WKNavigationDelegate {
     }
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        let url = navigationAction.request.url
-        
-        if let host = url?.host {
-            for website in websites {
-                if host.contains(website) {
-                    decisionHandler(.allow)
-                    return
-                }
+        guard let url = navigationAction.request.url, let host = url.host else {
+            decisionHandler(.cancel)
+            return
+        }
+
+        for website in websites {
+            if host.contains(website) {
+                decisionHandler(.allow)
+                return
             }
+        }
+
+        let ac = UIAlertController(title: "Oops...", message: "You have no permissions for this site", preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "OK", style: .default))
+        
+        if let viewController = webView.window?.rootViewController {
+            viewController.present(ac, animated: true)
         }
         
         decisionHandler(.cancel)
-        
-        let ac = UIAlertController(title: "Oops...", message: "You have not permissions for this sote", preferredStyle: .alert)
     }
-
-
 }
 
